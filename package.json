@@ -1,15 +1,11 @@
 {
-  "name": "prettygoat",
-  "version": "2.1.1",
+  "name": "@bstock/prettygoat",
+  "version": "3.0.0",
+  "private": true,
   "devDependencies": {
     "@types/expect.js": "~0.3.29",
     "@types/lolex": "~1.5.30",
     "@types/mocha": "~2.2.33",
-    "expect.js": "~0.3.1",
-    "lolex": "~1.5.2",
-    "typemoq": "~1.2.1"
-  },
-  "dependencies": {
     "@types/async": "~2.0.38",
     "@types/express": "~4.0.35",
     "@types/express-serve-static-core": "~4.0.40",
