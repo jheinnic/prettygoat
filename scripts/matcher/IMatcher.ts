@@ -1,3 +1,3 @@
 export interface IMatcher {
-    match(name: string): Function;
+    match(name: string): Function|null;
 }

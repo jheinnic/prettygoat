@@ -25,12 +25,19 @@ class Request implements IRequest {
     body: any;
 
     constructor(public originalRequest: IncomingMessage) {
-        let isChannel = _.startsWith(originalRequest.url, "pgoat://");
-        this.url = !isChannel ? originalRequest.url.replace(/\/+$/, "") : null; //Remove trailing slash
-        this.channel = isChannel ? originalRequest.url.substr(8) : null; //Remove pgoat://
-        this.method = originalRequest.method;
+        /* NOTE: It is presumed that all IncomingMessages arrive via HTTP, in order to be able to treat the URL
+                 field as presumptively present in all cases, despite the fact that is is structurally optional
+                  according to the base abstract IncomingMessage type.   It is generally optional, but contextually
+                  mandatory.  The same can be said of "method".   In contrast, the optional parameter associated
+                  with the incoming response to an HTTP Client are to be presumed unconditionally non-existent. */
+        let isChannel = _.startsWith(originalRequest.url!, "pgoat://");
+        if (isChannel) {
+            this.url = originalRequest.url!.replace(/\/+$/, ""); //Remove trailing slash
+            this.channel = originalRequest.url!.substr(8); //Remove pgoat://
+        }
+        this.method = originalRequest.method!;
         this.headers = originalRequest.headers;
-        this.query = qs.parse(url.parse(originalRequest.url).query);
+        this.query = qs.parse(url.parse(originalRequest.url!).query);
         this.params = null;
     }
 }
@@ -58,6 +65,7 @@ class Response implements IResponse {
             this.setHeader("Content-Type", "application/json");
             this.originalResponse.write(JSON.stringify(data));
         }
+
         this.end();
     }
 

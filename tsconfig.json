@@ -4,6 +4,8 @@
     "lib": ["es5", "es6"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "strictNullChecks": true,
+    "noImplicitUseStrict": false,
     "module": "commonjs",
     "types": ["mocha", "node", "reflect-metadata", "socket.io"]
   },

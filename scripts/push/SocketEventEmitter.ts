@@ -5,7 +5,7 @@ import ISocketConfig from "../configs/ISocketConfig";
 @injectable()
 class SocketEventEmitter implements IEventEmitter {
 
-    private socket: SocketIO.Server = null;
+    private socket: SocketIO.Server;
 
     constructor(@inject("ISocketConfig") private config: ISocketConfig,
                 @inject("ISocketFactory") private factory: ISocketFactory) {

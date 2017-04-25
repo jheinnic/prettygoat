@@ -20,9 +20,9 @@ class ProjectionSorter implements IProjectionSorter {
             graph = _.concat(graph, _.reduce(area.entries, (result, entry: RegistryEntry<any>) => {
                 result = _.concat(result, this.edgesOf(entry.projection));
                 return result;
-            }, []));
+            }, <string[][]>[]));
             return graph;
-        }, []));
+        }, <string[][]>[]));
     }
 
     dependencies(projection: IProjection<any>): string[] {
@@ -47,7 +47,11 @@ class ProjectionSorter implements IProjectionSorter {
     private edgesOf(projection: IProjection<any>): string[][] {
         return _(projection.definition)
             .keys()
-            .filter(projection => this.registry.getEntry(projection, null).data != null)
+            .filter(projection => {
+                let registryEntry = this.registry.getEntry(projection, undefined);
+                // TODO: Check whether null data was previously treated differently than undefined data?
+                return !!registryEntry && !!registryEntry.data;
+            })
             .map((nodeTo) => [projection.name, nodeTo])
             .valueOf();
     }

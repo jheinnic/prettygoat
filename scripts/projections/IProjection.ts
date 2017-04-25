@@ -4,14 +4,14 @@ import {SpecialState} from "./SpecialState";
 import {IFilterStrategy} from "../filters/IFilterStrategy";
 
 export interface IWhen<T extends Object> {
-    $init?:() => T;
-    $any?:(s:T, payload:Object, event?:Event) => T;
-    [name:string]:(s:T, payload:Object, event?:Event) => T|SpecialState<T>;
+    $init?: () => T;
+    $any?: (s: T, payload: Object, event?: Event) => T;
+    [name: string]: ((s: T, payload: Object, event?: Event) => T | SpecialState<T>) | undefined;
 }
 
 export interface ISplit {
-    $default?:(e:Object, event?:Event) => string;
-    [name:string]:(e:Object, event?:Event) => string;
+    $default?: (s: Object, e?: Event) => string;
+    [name: string]: ((s: Object, e?: Event) => string) | undefined;
 }
 
 export interface IProjection<T> {

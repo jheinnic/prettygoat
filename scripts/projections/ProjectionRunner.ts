@@ -43,7 +43,7 @@ class ProjectionRunner<T> implements IProjectionRunner<T> {
 
         this.stats.running = true;
         this.subscribeToStateChanges();
-        this.state = snapshot ? snapshot.memento : this.matcher.match(SpecialNames.Init)();
+        this.state = snapshot ? snapshot.memento : this.matcher.match(SpecialNames.Init)!();
         this.notifyStateChange(new Date(1));
         let combinedStream = new Subject<Event>();
         let completions = new Subject<string>();
@@ -59,13 +59,18 @@ class ProjectionRunner<T> implements IProjectionRunner<T> {
             .subscribe(data => {
                 let [event, matchFn] = data;
                 try {
-                    let newState = matchFn(this.state, event.payload, event);
-                    if (newState instanceof SpecialState)
+                    let newState = matchFn!(this.state, event.payload, event);
+                    if (newState === undefined) {
+                        throw Error("new state is undefined")
+                    } else if (newState instanceof SpecialState)
                         this.state = (<SpecialState<T>>newState).state;
                     else
                         this.state = newState;
+
+                    // Stop Signalling State events always bear a timestamp.  In this specific scenario,
+                    // timestamp is not an optional property.
                     if (!(newState instanceof StopSignallingState))
-                        this.notifyStateChange(event.timestamp);
+                        this.notifyStateChange(event.timestamp!);
                 } catch (error) {
                     this.isFailed = true;
                     this.subject.onError(error);

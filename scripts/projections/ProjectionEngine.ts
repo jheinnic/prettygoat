@@ -39,8 +39,9 @@ class ProjectionEngine implements IProjectionEngine {
 
     run(projection?: IProjection<any>, context?: PushContext) {
         if (projection) {
+            // TODO: Assess whether context is optional or manditory, and whether its ordere right in the argument list.
             this.snapshotRepository.getSnapshot(projection.name).subscribe(snapshot => {
-                this.runSingleProjection(projection, context, snapshot);
+                this.runSingleProjection(projection, context!, snapshot);
             });
         } else {
             this.sorter.sort();

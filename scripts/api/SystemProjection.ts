@@ -31,7 +31,7 @@ class SystemProjection implements IProjectionDefinition<any> {
                     };
                 },
                 $any: (state, payload, event) => {
-                    if (event.timestamp)
+                    if (event && event.timestamp)
                         eventsCounter++;
                     if (eventsCounter % 200 === 0)
                         return {
@@ -48,7 +48,10 @@ class SystemProjection implements IProjectionDefinition<any> {
         return _.mapValues(this.holder, (runner: IProjectionRunner<any>, key: string) => {
             if (_.startsWith(key, "__diagnostic"))
                 return undefined;
-            let projection: IProjection<any> = this.registry.getEntry(key, null).data.projection;
+            // Disarm undefined-checks here since we got the key from a collection tracking members of
+            // the running projections set.
+            // TODO: Verify the !'s here are indeed safe!!!
+            let projection: IProjection<any> = this.registry.getEntry(key, undefined)!.data!.projection;
             return {
                 dependencies: this.projectionSorter.dependencies(projection)
             };

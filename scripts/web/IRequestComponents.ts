@@ -16,7 +16,7 @@ export interface IRouteResolver {
     resolve(request: IRequest): IRouteContext;
 }
 
-export type IRouteContext = [IRequestHandler, any];
+export type IRouteContext = [IRequestHandler|undefined, any];
 
 export interface IRequest {
     url: string;

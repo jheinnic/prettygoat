@@ -1,10 +1,15 @@
 import {Observable} from "rx";
 import Dictionary from "../util/Dictionary";
 
+const EMPTY_DATE = new Date(0);
+
 export class Snapshot<T> {
     public static Empty: Snapshot<any> = new Snapshot<any>(undefined, undefined);
 
-    constructor(public memento: T, public lastEvent: Date) {
+    public lastEvent: Date;
+
+    constructor(public memento: T, lastEvent?: Date) {
+        this.lastEvent = !!lastEvent ? lastEvent : EMPTY_DATE;
     }
 }
 

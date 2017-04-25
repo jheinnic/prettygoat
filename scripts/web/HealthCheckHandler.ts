@@ -9,7 +9,7 @@ class HealthCheckHandler implements IRequestHandler {
     }
 
     keyFor(request: IRequest): string {
-        return null;
+        return "null";
     }
 
 }

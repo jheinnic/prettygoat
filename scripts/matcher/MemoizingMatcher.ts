@@ -10,7 +10,7 @@ export class MemoizingMatcher implements IMatcher {
     match(name:string):Function {
         let cachedMatch = this.cache[name];
         if (!cachedMatch)
-            this.cache[name] = cachedMatch = this.baseMatcher.match(name);
+            this.cache[name] = cachedMatch = this.baseMatcher.match(name)!;
         return cachedMatch;
     }
 }

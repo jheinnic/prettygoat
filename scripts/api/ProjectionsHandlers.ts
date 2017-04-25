@@ -66,7 +66,13 @@ export class ProjectionRestartHandler extends BaseProjectionHandler {
                 runner.stop();
 
             this.snapshotRepository.deleteSnapshot(projectionName).subscribe(() => {
-                this.projectionEngine.run(entry.data.projection, new PushContext(entry.area, entry.data.exposedName));
+                if (!entry || !entry.data || !entry.area) {
+                    throw Error("Incomplete metdata to restart " + projectionName );
+                }
+
+                this.projectionEngine.run(
+                    entry.data.projection,
+                    new PushContext(entry.area, entry.data.exposedName));
                 response.status(204);
                 response.send();
             }, () => this.writeError(response));

@@ -29,7 +29,7 @@ class PushNotifier implements IPushNotifier {
         }
     }
 
-    private buildNotification(context: PushContext, splitKey: string): PushNotification {
+    private buildNotification(context: PushContext, splitKey?: string): PushNotification {
         let url = `${this.config.protocol}://${this.config.host}`;
         if (this.config.port)
             url += `:${this.config.port}`;

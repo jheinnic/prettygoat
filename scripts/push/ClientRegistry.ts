@@ -12,7 +12,7 @@ class ClientRegistry implements IClientRegistry {
 
     add(client: ISocketClient, context: PushContext) {
         let entry = this.registry.getEntry(context.projectionName, context.area);
-        if (!entry.data.parametersKey) {
+        if (!entry || !entry.data || !entry.data.parametersKey) {
             client.join(ContextOperations.getRoom(context));
         } else {
             client.join(ContextOperations.getRoom(context, entry.data.parametersKey(context.parameters)));
@@ -21,7 +21,7 @@ class ClientRegistry implements IClientRegistry {
 
     remove(client: ISocketClient, context: PushContext) {
         let entry = this.registry.getEntry(context.projectionName, context.area);
-        if (!entry.data.parametersKey) {
+        if (!entry || !entry.data || !entry.data.parametersKey) {
             client.leave(ContextOperations.getRoom(context));
         } else {
             client.leave(ContextOperations.getRoom(context, entry.data.parametersKey(context.parameters)));

@@ -29,14 +29,14 @@ class RouteResolver implements IRouteResolver {
     }
 
     resolve(request: IRequest): IRouteContext {
-        let pathname = url.parse(request.url).pathname;
+        let pathname: string = url.parse(request.url).pathname!;
         let context = <IRouteContext>_(this.routes)
             .filter(route => route.method === request.method)
             .map(route => [route.handler, route.matcher ? route.matcher.match(pathname) : false])
             .filter(route => route[1])
             .flatten()
             .valueOf();
-        return !context[0] ? [null, null] : context;
+        return !context[0] ? [undefined, undefined] : context;
     }
 
 }

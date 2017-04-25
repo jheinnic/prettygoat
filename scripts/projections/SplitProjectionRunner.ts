@@ -80,11 +80,11 @@ class SplitProjectionRunner<T> extends ProjectionRunner<T> {
     }
 
     private initSplit(matchFn: Function, event, splitKey: string) {
-        this.state[splitKey] = this.matcher.match(SpecialNames.Init)();
+        this.state[splitKey] = this.matcher.match(SpecialNames.Init)!();
         _.forEach(this.readModelFactory.asList(), readModel => {
             let matchFn = this.matcher.match(readModel.type);
             if (matchFn !== Identity) {
-                this.state[splitKey] = matchFn(this.state[splitKey], readModel.payload, readModel);
+                this.state[splitKey] = matchFn!(this.state[splitKey], readModel.payload, readModel);
                 this.notifyStateChange(event.timestamp, splitKey);
             }
         });

@@ -9,7 +9,7 @@ const emptyState = () => { return {}; };
 export class Matcher implements IMatcher {
     constructor(private definition: any) { }
 
-    match(name: string): Function {
+    match(name: string): Function|null {
         this.guardAmbiguousDefinition();
 
         if (name === SpecialNames.Any || name === SpecialNames.Default)
@@ -33,18 +33,18 @@ export class Matcher implements IMatcher {
             throw new Error(`Matcher has an ambiguous default match defined both as ${SpecialNames.Any} and ${SpecialNames.Default}`);
     }
 
-    private explicitMatch(name: string, throwOnNotFound?: boolean): Function {
+    private explicitMatch(name: string, throwOnNotFound?: boolean): Function|null {
         if (_(this.definition).has(name) && _.isFunction(this.definition[name]))
             return this.definition[name];
         if (throwOnNotFound)
             throw new Error(`Matcher doesn't have a ${name} member`);
-        return undefined;
+        return null;
     }
 
-    private wildcardMatch(name: string): Function {
+    private wildcardMatch(name: string): Function|null {
         const found = _(this.definition).toPairs().filter((pair: [string, Function]) => wildcard(name, pair[0])).first();
         if (found !== undefined && _.isFunction(found[1]))
             return <Function>found[1];
-        return undefined;
+        return null;
     }
 }

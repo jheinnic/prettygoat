@@ -6,7 +6,7 @@ const io = require("socket.io");
 @injectable()
 class SocketFactory implements ISocketFactory {
 
-    private socket: SocketIO.Server = null;
+    private socket: SocketIO.Server;
 
     constructor(@inject("IServerProvider") private serverProvider: IServerProvider) {
 

@@ -1,6 +1,6 @@
-import {IRequestHandler, IRequest, IResponse} from "../web/IRequestComponents";
+import {IRequest, IRequestHandler, IResponse} from "../web/IRequestComponents";
 import Route from "../web/RouteDecorator";
-import IProjectionRegistry from "../registry/IProjectionRegistry";
+import IProjectionRegistry from "./registry/IProjectionRegistry";
 import {inject} from "inversify";
 import Dictionary from "../util/Dictionary";
 import IProjectionRunner from "./IProjectionRunner";
@@ -19,9 +19,17 @@ class ProjectionStateHandler implements IRequestHandler {
     handle(request: IRequest, response: IResponse): Promise<void> {
         let projectionName = request.params.projectionName,
             area = request.params.area,
-            splitKey = request.params.splitKey,
-            entry = this.projectionRegistry.getEntry(projectionName, area).data;
+            splitKey = request.params.splitKey;
+
+        let registryEntry = this.projectionRegistry.getEntry(projectionName, area);
+        if (!registryEntry || !registryEntry.data) {
+            console.error("TODO");
+            return Promise.resolve(undefined);
+        }
+
+        let entry = registryEntry.data;
         if (!entry) {
+            console.error("TODO");
             this.sendNotFound(response);
         } else {
             let filterStrategy = entry.projection.filterStrategy || new IdentityFilterStrategy<any>(),
@@ -34,9 +42,13 @@ class ProjectionStateHandler implements IRequestHandler {
             }
             if (state)
                 return this.sendResponse(request, response, state, filterStrategy);
-            else
+            else {
+                console.error("TODO");
                 this.sendNotFound(response);
+            }
         }
+
+        return Promise.resolve();
     }
 
     private sendNotFound(response: IResponse) {
@@ -69,8 +81,11 @@ class ProjectionStateHandler implements IRequestHandler {
     keyFor(request: IRequest): string {
         let projectionName = request.params.projectionName,
             area = request.params.area;
-        let entry = this.projectionRegistry.getEntry(projectionName, area).data;
-        return !entry ? null : entry.projection.name;
+        let registryEntry = this.projectionRegistry.getEntry(projectionName, area);
+        if (!registryEntry || !registryEntry.data)
+            throw Error("Request has no data to key off");
+
+        return registryEntry.data.projection.name;
     }
 
 }

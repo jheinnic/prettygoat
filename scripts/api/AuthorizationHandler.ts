@@ -9,7 +9,7 @@ class AuthorizationHandler implements IRequestHandler {
     }
 
     keyFor(request: IRequest): string {
-        return null;
+        return "";
     }
 
 }
