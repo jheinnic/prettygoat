@@ -1,4 +1,4 @@
-import {IProjection} from "../projections/IProjection";
+import {IProjection} from "../../projections/IProjection";
 
 class RegistryEntry<T> {
 

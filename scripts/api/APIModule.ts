@@ -1,6 +1,5 @@
-import IModule from "../bootstrap/IModule";
 import {interfaces} from "inversify";
-import IProjectionRegistry from "../registry/IProjectionRegistry";
+import IModule from "../bootstrap/module/IModule";
 import IServiceLocator from "../ioc/IServiceLocator";
 import IAuthorizationStrategy from "./IAuthorizationStrategy";
 import {IMiddleware, IRequestHandler} from "../web/IRequestComponents";
@@ -10,6 +9,7 @@ import AuthorizationHandler from "./AuthorizationHandler";
 import SystemProjection from "./SystemProjection";
 import ApiKeyAuthorizationStrategy from "./ApiKeyAuthorizationStrategy";
 import {ProjectionStopHandler, ProjectionStatsHandler, ProjectionRestartHandler} from "./ProjectionsHandlers";
+import {IRegistry} from "../bootstrap/module/IRegistry";
 
 class APIModule implements IModule {
 
@@ -24,8 +24,15 @@ class APIModule implements IModule {
         container.bind<IRequestHandler>("IRequestHandler").to(ProjectionStatsHandler).inSingletonScope();
     };
 
-    register(registry: IProjectionRegistry, serviceLocator?: IServiceLocator, overrides?: any): void {
-        registry.add(SystemProjection).forArea("__diagnostic");
+    register(registry: IRegistry, serviceLocator?: IServiceLocator, overrides?: any): void {
+        switch (registry.registryType) {
+            case "aggregate":
+                break;
+            case "projection": {
+                registry.add(SystemProjection).forArea("__diagnostic");
+                break;
+            }
+        }
     }
 }
 

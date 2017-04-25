@@ -1,7 +1,7 @@
 import PushContext from "./PushContext";
 import ContextOperations from "./ContextOperations";
 import {injectable, inject} from "inversify";
-import IProjectionRegistry from "../registry/IProjectionRegistry";
+import IProjectionRegistry from "../projections/registry/IProjectionRegistry";
 import {IClientRegistry, ISocketClient} from "./IPushComponents";
 
 @injectable()

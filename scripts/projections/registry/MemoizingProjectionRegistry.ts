@@ -1,14 +1,17 @@
-import IProjectionRegistry from "./IProjectionRegistry";
 import {inject, interfaces, injectable} from "inversify";
+import IProjectionRegistry from "./IProjectionRegistry";
 import IProjectionDefinition from "./IProjectionDefinition";
 import AreaRegistry from "./AreaRegistry";
 import RegistryEntry from "./RegistryEntry";
-import Dictionary from "../util/Dictionary";
+import Dictionary from "../../util/Dictionary";
+
+type CachedLookup = { area: string; data: RegistryEntry<any>|undefined };
 
 @injectable()
 class MemoizingProjectionRegistry implements IProjectionRegistry {
+    registryType: "projection";
 
-    private cache: Dictionary<{area: string; data: RegistryEntry<any>}> = {};
+    private cache: Dictionary<CachedLookup> = { };
 
     constructor(@inject("ProjectionRegistry") private registry: IProjectionRegistry) {
 
@@ -34,15 +37,19 @@ class MemoizingProjectionRegistry implements IProjectionRegistry {
         return this.registry.getAreas();
     }
 
-    getArea(areaId: string): AreaRegistry {
+    getArea(areaId: string): AreaRegistry | undefined {
         return this.registry.getArea(areaId);
     }
 
-    getEntry<T>(id: string, area?: string): {area: string; data: RegistryEntry<T>} {
-        let cachedEntry = this.cache[id + area];
-        if (!cachedEntry) {
-            this.cache[id + area] = cachedEntry = this.registry.getEntry(id, area);
+    getEntry<T>(id: string, area?: string): CachedLookup | undefined {
+        let cachedEntry: CachedLookup | undefined = this.cache[id + area];
+        if ((cachedEntry === undefined) || (cachedEntry.data === undefined)) {
+            cachedEntry = this.registry.getEntry(id, area);
+            if (cachedEntry !== undefined) {
+                this.cache[id + area] = cachedEntry;
+            }
         }
+
         return cachedEntry;
     }
 

@@ -1,5 +1,5 @@
-import Projection from "../registry/ProjectionDecorator";
-import IProjectionDefinition from "../registry/IProjectionDefinition";
+import Projection from "../projections/registry/ProjectionDecorator";
+import IProjectionDefinition from "../projections/registry/IProjectionDefinition";
 import {IProjection} from "../projections/IProjection";
 import {inject} from "inversify";
 import Dictionary from "../util/Dictionary";
@@ -7,7 +7,7 @@ import IProjectionRunner from "../projections/IProjectionRunner";
 import * as _ from "lodash";
 import TickScheduler from "../ticks/TickScheduler";
 import IProjectionSorter from "../projections/IProjectionSorter";
-import IProjectionRegistry from "../registry/IProjectionRegistry";
+import IProjectionRegistry from "../projections/registry/IProjectionRegistry";
 const sizeof = require("object-sizeof");
 const humanize = require("humanize");
 

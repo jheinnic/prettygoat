@@ -10,7 +10,7 @@ import SplitProjectionRunner from "../projections/SplitProjectionRunner";
 import Base = Mocha.reporters.Base;
 import IProjectionEngine from "../projections/IProjectionEngine";
 import {ISnapshotRepository} from "../snapshots/ISnapshotRepository";
-import IProjectionRegistry from "../registry/IProjectionRegistry";
+import IProjectionRegistry from "../projections/registry/IProjectionRegistry";
 import PushContext from "../push/PushContext";
 
 @injectable()
