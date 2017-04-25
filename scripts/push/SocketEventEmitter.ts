@@ -1,6 +1,6 @@
 import {injectable, inject} from "inversify";
 import {IEventEmitter, ISocketFactory} from "./IPushComponents";
-import ISocketConfig from "../configs/ISocketConfig";
+import ISocketConfig from "../bootstrap/configs/ISocketConfig";
 
 @injectable()
 class SocketEventEmitter implements IEventEmitter {

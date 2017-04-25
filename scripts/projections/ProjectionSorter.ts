@@ -1,8 +1,8 @@
 import {injectable, inject} from "inversify";
-import IProjectionRegistry from "../registry/IProjectionRegistry";
+import IProjectionRegistry from "./registry/IProjectionRegistry";
 import * as _ from "lodash";
-import AreaRegistry from "../registry/AreaRegistry";
-import RegistryEntry from "../registry/RegistryEntry";
+import AreaRegistry from "./registry/AreaRegistry";
+import RegistryEntry from "./registry/RegistryEntry";
 import IProjectionSorter from "./IProjectionSorter";
 import {IProjection} from "./IProjection";
 import {Matcher} from "../matcher/Matcher";

@@ -1,11 +1,11 @@
 import IProjectionEngine from "./IProjectionEngine";
-import {injectable, inject} from "inversify";
-import IProjectionRegistry from "../registry/IProjectionRegistry";
+import {inject, injectable} from "inversify";
+import IProjectionRegistry from "./registry/IProjectionRegistry";
 import * as _ from "lodash";
-import AreaRegistry from "../registry/AreaRegistry";
+import AreaRegistry from "./registry/AreaRegistry";
 import PushContext from "../push/PushContext";
 import {ISnapshotRepository, Snapshot} from "../snapshots/ISnapshotRepository";
-import RegistryEntry from "../registry/RegistryEntry";
+import RegistryEntry from "./registry/RegistryEntry";
 import IProjectionRunnerFactory from "./IProjectionRunnerFactory";
 import ILogger from "../log/ILogger";
 import NullLogger from "../log/NullLogger";
@@ -49,14 +49,14 @@ class ProjectionEngine implements IProjectionEngine {
                 .initialize()
                 .flatMap(() => this.snapshotRepository.getSnapshots())
                 .subscribe(snapshots => {
-                    let areas = this.registry.getAreas();
-                    _.forEach<AreaRegistry>(areas, areaRegistry => {
-                        _.forEach<RegistryEntry<any>>(areaRegistry.entries, (entry: RegistryEntry<any>) => {
-                            let projection = entry.projection;
-                            this.runSingleProjection(projection, new PushContext(areaRegistry.area, entry.exposedName), snapshots[projection.name]);
+                        let areas = this.registry.getAreas();
+                        _.forEach<AreaRegistry>(areas, areaRegistry => {
+                            _.forEach<RegistryEntry<any>>(areaRegistry.entries, (entry: RegistryEntry<any>) => {
+                                let projection = entry.projection;
+                                this.runSingleProjection(projection, new PushContext(areaRegistry.area, entry.exposedName), snapshots[projection.name]);
+                            });
                         });
                     });
-                });
         }
     }
 
@@ -73,15 +73,15 @@ class ProjectionEngine implements IProjectionEngine {
             });
 
         if (!projection.split)
-            sequence = sequence.sample(200);
+            sequence = sequence.sampleTime(200);
         else
-            sequence = sequence.groupBy(state => state.splitKey).flatMap(states => states.sample(200));
+            sequence = sequence.groupBy(state => state.splitKey).flatMap(states => states.sampleTime(200));
 
         let subscription = sequence.subscribe(state => {
             this.pushNotifier.notify(context, state.splitKey);
             this.logger.info(`Notifying state change on ${context.area}:${context.projectionName} ${state.splitKey ? "with key " + state.splitKey : ""}`);
         }, error => {
-            subscription.dispose();
+            subscription.unsubscribe();
             this.logger.error(error);
         });
 
