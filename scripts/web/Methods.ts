@@ -1,4 +1,4 @@
-type Methods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "PATCH";
+type Methods = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
 
 export default Methods
