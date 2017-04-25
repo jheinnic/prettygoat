@@ -29,4 +29,8 @@ export class DeleteSplitState extends SpecialState<any> {
         super();
         this.state = undefined;
     }
+
+    get state(): any {
+        return undefined;
+    }
 }

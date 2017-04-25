@@ -1,4 +1,4 @@
-import {injectable, decorate} from "inversify";
+import {decorate, injectable} from "inversify";
 import Methods from "./Methods";
 
 function Route(method: Methods, path: string) {
@@ -11,3 +11,4 @@ function Route(method: Methods, path: string) {
 }
 
 export default Route
+

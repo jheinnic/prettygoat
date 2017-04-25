@@ -15,9 +15,9 @@ export interface ISplit {
 }
 
 export interface IProjection<T> {
-    name:string;
-    split?:ISplit;
-    definition:IWhen<T>;
-    snapshotStrategy?:ISnapshotStrategy;
+    name: string;
+    split?: ISplit;
+    definition: IWhen<T>;
+    snapshotStrategy?: ISnapshotStrategy;
     filterStrategy?: IFilterStrategy<T>;
 }
