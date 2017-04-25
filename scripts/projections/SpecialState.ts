@@ -1,33 +1,35 @@
 export abstract class SpecialState<T> {
-    state:T;
+    // state:T;
+    abstract get state(): T;
 }
 
 export class SpecialStates {
 
-    static stopSignalling<T>(state:T):SpecialState<T> {
+    static stopSignalling<T>(state: T): SpecialState<T> {
         return new StopSignallingState(state);
     }
 
-    static deleteSplit():SpecialState<any> {
+    static deleteSplit(): SpecialState<any> {
         return new DeleteSplitState();
     }
 }
 
 export class StopSignallingState<T> extends SpecialState<T> {
-    state:T;
+    private readonly _state: T;
 
-    constructor(state:T) {
+    constructor(state: T) {
         super();
-        this.state = state;
+        this._state = state;
+    }
+
+    get state(): T {
+        return this._state;
     }
 }
 
 export class DeleteSplitState extends SpecialState<any> {
-    state:any;
-
     constructor() {
         super();
-        this.state = undefined;
     }
 
     get state(): any {
