@@ -1,4 +1,4 @@
-import {Observable} from "rx";
+import {Observable} from "rxjs";
 import Dictionary from "../util/Dictionary";
 
 const EMPTY_DATE = new Date(0);

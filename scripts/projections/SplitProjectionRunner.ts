@@ -1,6 +1,6 @@
 import {IMatcher} from "../matcher/IMatcher";
 import {IStreamFactory} from "../streams/IStreamFactory";
-import {helpers, Subject} from "rx";
+import {Subject} from "rxjs";
 import IReadModelFactory from "../streams/IReadModelFactory";
 import {Event} from "../streams/Event";
 import * as _ from "lodash";
@@ -37,14 +37,14 @@ class SplitProjectionRunner<T> extends ProjectionRunner<T> {
         let completions = new Subject<string>();
 
         this.subscription = combinedStream
-            .map<[Event, Function, Function]>(event => [
+            .map<Event, [Event, Function, Function]>(event => [
                 event,
-                this.matcher.match(event.type),
-                this.splitMatcher.match(event.type)
+                this.matcher.match(event.type)!,
+                this.splitMatcher.match(event.type)!
             ])
             .do(data => {
                 if (data[0].type === ReservedEvents.FETCH_EVENTS)
-                    completions.onNext(data[0].payload.event);
+                    completions.next(data[0].payload.event);
             })
             .filter(data => data[1] !== Identity)
             .do(data => this.updateStats(data[0]))
@@ -59,20 +59,22 @@ class SplitProjectionRunner<T> extends ProjectionRunner<T> {
                             this.initSplit(matchFn, event, splitKey);
                         else
                             this.state[splitKey] = matchFn(childState, event.payload, event);
-                        this.notifyStateChange(event.timestamp, splitKey);
+                        this.notifyStateChange(event.timestamp!, splitKey);
                     } else {
                         this.dispatchEventToAll(matchFn, event);
                     }
                 } catch (error) {
                     this.isFailed = true;
-                    this.subject.onError(error);
+                    this.subject.error(error);
                     this.stop();
                 }
             });
 
         combineStreams(
             combinedStream,
-            this.stream.from(snapshot ? snapshot.lastEvent : null, completions, this.projection.definition)
+            this.stream.from(
+                (snapshot && snapshot.lastEvent) ? snapshot.lastEvent : null,
+                completions, this.projection.definition)
                 .filter(event => event.type !== this.streamId),
             this.readModelFactory.from(null).filter(event => event.type !== this.streamId),
             this.tickScheduler.from(null),
@@ -93,7 +95,7 @@ class SplitProjectionRunner<T> extends ProjectionRunner<T> {
 
     private dispatchEventToAll(matchFn: Function, event) {
         _.forEach(this.state, (state, key) => {
-            if (this.state[key]) {
+            if (key && this.state[key]) {
                 this.state[key] = matchFn(state, event.payload, event);
                 this.notifyStateChange(event.timestamp, key);
             }
@@ -107,7 +109,7 @@ class SplitProjectionRunner<T> extends ProjectionRunner<T> {
         if (newState instanceof DeleteSplitState)
             delete this.state[splitKey];
         if (!(newState instanceof StopSignallingState))
-            this.subject.onNext({
+            this.subject.next({
                 type: this.streamId,
                 payload: this.state[splitKey],
                 timestamp: timestamp,

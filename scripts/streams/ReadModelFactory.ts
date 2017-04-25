@@ -1,5 +1,5 @@
 import IReadModelFactory from "./IReadModelFactory";
-import {Subject, Observable} from "rx";
+import {Subject, Observable} from "rxjs";
 import {injectable} from "inversify";
 import Dictionary from "../util/Dictionary";
 import {Event} from "./Event";
@@ -17,7 +17,7 @@ class ReadModelFactory implements IReadModelFactory {
 
     publish(event:Event):void {
         this.readModels[event.type] = event;
-        this.subject.onNext(event);
+        this.subject.next(event);
     }
 
     asList():any[] {

@@ -1,4 +1,4 @@
-import {Subject, IDisposable} from "rx";
+import {Subject, Subscription} from "rxjs";
 import {SpecialNames} from "../matcher/SpecialNames";
 import {IMatcher} from "../matcher/IMatcher";
 import {IStreamFactory} from "../streams/IStreamFactory";
@@ -15,18 +15,23 @@ import ProjectionStats from "./ProjectionStats";
 import ReservedEvents from "../streams/ReservedEvents";
 import Identity from "../matcher/Identity";
 
-class ProjectionRunner<T> implements IProjectionRunner<T> {
-    state: T|Dictionary<T>;
+class ProjectionRunner<T> extends Subscription implements IProjectionRunner<T> {
+    state: T | Dictionary<T> | undefined;
     stats = new ProjectionStats();
     protected streamId: string;
     protected subject: Subject<Event>;
-    protected subscription: IDisposable;
+    protected subscription: Subscription;
     protected isDisposed: boolean;
     protected isFailed: boolean;
 
     constructor(protected projection: IProjection<T>, protected stream: IStreamFactory, protected matcher: IMatcher, protected readModelFactory: IReadModelFactory,
                 protected tickScheduler: IStreamFactory, protected dateRetriever: IDateRetriever) {
+        super(() => {
+            this.stop();
+        });
+
         this.subject = new Subject<Event>();
+        this.add(this.subject);
         this.streamId = projection.name;
     }
 
@@ -34,7 +39,7 @@ class ProjectionRunner<T> implements IProjectionRunner<T> {
         return this.subject;
     }
 
-    run(snapshot?: Snapshot<T|Dictionary<T>>): void {
+    run(snapshot?: Snapshot<T | Dictionary<T>>): void {
         if (this.isDisposed)
             throw new Error(`${this.streamId}: cannot run a disposed projection`);
 
@@ -45,14 +50,18 @@ class ProjectionRunner<T> implements IProjectionRunner<T> {
         this.subscribeToStateChanges();
         this.state = snapshot ? snapshot.memento : this.matcher.match(SpecialNames.Init)!();
         this.notifyStateChange(new Date(1));
+
         let combinedStream = new Subject<Event>();
         let completions = new Subject<string>();
+        this.add(combinedStream);
+        this.add(completions);
 
         this.subscription = combinedStream
-            .map<[Event, Function]>(event => [event, this.matcher.match(event.type)])
+            .map<Event, [Event, Function | null]>(event => [event, this.matcher.match(event.type)])
+            .filter(data => !!data && !!data[1])
             .do(data => {
                 if (data[0].type === ReservedEvents.FETCH_EVENTS)
-                    completions.onNext(data[0].payload.event);
+                    completions.next(data[0].payload.event);
             })
             .filter(data => data[1] !== Identity)
             .do(data => this.updateStats(data[0]))
@@ -73,10 +82,12 @@ class ProjectionRunner<T> implements IProjectionRunner<T> {
                         this.notifyStateChange(event.timestamp!);
                 } catch (error) {
                     this.isFailed = true;
-                    this.subject.onError(error);
+                    this.subject.error(error);
                     this.stop();
                 }
             });
+
+        this.add(this.subscription);
 
         combineStreams(
             combinedStream,
@@ -88,14 +99,15 @@ class ProjectionRunner<T> implements IProjectionRunner<T> {
 
     //Patch to remove sampling in tests where needed
     protected subscribeToStateChanges() {
-        this.subject.sample(100).subscribe(readModel => {
-            this.readModelFactory.publish({
-                payload: readModel.payload,
-                type: readModel.type,
-                timestamp: null,
-                splitKey: null
-            });
-        }, error => null);
+        this.add(
+            this.subject.sampleTime(100).subscribe(readModel => {
+                this.readModelFactory.publish({
+                    payload: readModel.payload,
+                    type: readModel.type,
+                    timestamp: readModel.timestamp,  // Was undefined?
+                    splitKey: readModel.splitKey     // Was undefined?
+                });
+            }, error => null));
     }
 
     protected updateStats(event: Event) {
@@ -106,27 +118,20 @@ class ProjectionRunner<T> implements IProjectionRunner<T> {
     }
 
     stop(): void {
-        if (this.isDisposed)
+        if (this.closed)
             throw Error("Projection already stopped");
 
-        this.isDisposed = true;
+        // this.isDisposed = true;
         this.stats.running = false;
 
-        if (this.subscription)
-            this.subscription.dispose();
+        // if (this.subscription)
+        //     this.subscription.unsubscribe();
         if (!this.isFailed)
-            this.subject.onCompleted();
-    }
-
-    dispose(): void {
-        this.stop();
-
-        if (!this.subject.isDisposed)
-            this.subject.dispose();
+            this.subject.complete();
     }
 
     protected notifyStateChange(timestamp: Date, splitKey?: string) {
-        this.subject.onNext({payload: this.state, type: this.streamId, timestamp: timestamp, splitKey: null});
+        this.subject.next({payload: this.state, type: this.streamId, timestamp: timestamp, splitKey: undefined});
     }
 }
 

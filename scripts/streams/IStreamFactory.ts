@@ -1,4 +1,4 @@
-import {Observable} from "rx";
+import {Observable} from "rxjs";
 import {Event} from "./Event";
 import {IWhen} from "../projections/IProjection";
 

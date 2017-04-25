@@ -1,4 +1,3 @@
-import {Subject, ReplaySubject, Observable} from "rx";
 import {Event} from "../streams/Event";
 import IDateRetriever from "../util/IDateRetriever";
 import ReservedEvents from "../streams/ReservedEvents";
@@ -6,6 +5,7 @@ import ITickScheduler from "./ITickScheduler";
 import Tick from "./Tick";
 
 import {injectable, inject} from "inversify";
+import {ReplaySubject, Observable} from "rxjs";
 import * as moment from "moment";
 
 @injectable()
@@ -19,7 +19,7 @@ class TickScheduler implements ITickScheduler {
 
     schedule(dueTime:number|Date, state?:string, splitKey?:string) {
         let dueDate = dueTime instanceof Date ? dueTime : this.calculateDueDate(<number>dueTime);
-        this.subject.onNext({
+        this.subject.next({
             type: ReservedEvents.TICK,
             payload: new Tick(dueDate, state),
             timestamp: dueDate,
